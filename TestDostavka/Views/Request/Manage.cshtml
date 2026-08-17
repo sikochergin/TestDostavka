@@ -1,0 +1,178 @@
+﻿@model ManagerRequestsPageModel
+
+<h1>Все заявки</h1>
+
+<form asp-controller="Request"
+      asp-action="Manage"
+      method="get">
+
+    <div class="filters">
+
+        <div class="filters__item">
+            <label>
+                Статусы
+            </label>
+
+            <details class="status-dropdown">
+                <summary>
+                    Выбрать статусы
+                    @if (Model.Filter.Statuses.Count > 0)
+                    {
+                        <span>
+                            (@Model.Filter.Statuses.Count)
+                        </span>
+                    }
+                </summary>
+
+                <div class="status-dropdown__menu"  >
+                    @foreach (var status in Enum.GetValues<RequestStatus>())
+                    {
+                        var checkboxId = $"status-{status}";
+
+                        <div class="status-dropdown__option">
+                            @if (Model.Filter.Statuses.Contains(status))
+                            {
+                                <input type="checkbox"
+                                       id="@checkboxId"
+                                       name="Statuses"
+                                       value="@status"
+                                       checked />
+                            }
+                            else
+                            {
+                                <input type="checkbox"
+                                       id="@checkboxId"
+                                       name="Statuses"
+                                       value="@status" />
+                            }
+
+                            <label for="@checkboxId">
+                                @status
+                            </label>
+                        </div>
+                    }
+                </div>
+            </details>
+        </div>
+
+        <div class="filters__item">
+            <label for="email">
+                Email пользователя
+            </label>
+
+            <input type="text"
+                   id="email"
+                   name="Email"
+                   value="@Model.Filter.Email"
+                   placeholder="example@mail.ru" />
+        </div>
+
+        <div class="filters__item">
+            <label for="dateFrom">
+                Дата создания от
+            </label>
+
+            <input type="date"
+                   id="dateFrom"
+                   name="DateFrom"
+                   value="@Model.Filter.DateFrom?.ToString("yyyy-MM-dd")" />
+        </div>
+
+        <div class="filters__item">
+            <label for="dateTo">
+                Дата создания до
+            </label>
+
+            <input type="date"
+                   id="dateTo"
+                   name="DateTo"
+                   value="@Model.Filter.DateTo?.ToString("yyyy-MM-dd")" />
+        </div>
+
+        <div class="filters__actions">
+            <button class="button button--primary" type="submit">
+                Применить
+            </button>
+        </div>
+
+        <div class="filters__reset">
+            <a asp-controller="Request"
+               asp-action="Manage">
+                Сбросить
+            </a>
+        </div>
+
+    </div>
+</form>
+
+<hr />
+
+@if (Model.Requests.Count == 0)
+{
+    <p>Заявки по выбранным фильтрам не найдены.</p>
+}
+else
+{
+    <p>
+        Найдено заявок: @Model.Requests.Count
+    </p>
+
+    <table>
+        <thead>
+            <tr>
+                <th>Название товара</th>
+                <th>Email пользователя</th>
+                <th>Статус</th>
+                <th>Дата создания</th>
+                <th>Дата доставки</th>
+                <th>Ссылка на товар</th>
+            </tr>
+        </thead>
+
+        <tbody>
+            @foreach (var request in Model.Requests)
+            {
+                <tr>
+                    <td>
+                        <a asp-controller="Request"
+                           asp-action="RequestCard"
+                           asp-route-requestId="@request.Id">
+                            @request.ProductName
+                        </a>
+                    </td>
+
+                    <td>
+                        @request.CustomerEmail
+                    </td>
+
+                    <td>
+                        @request.Status
+                    </td>
+
+                    <td>
+                        @request.DateTime.ToString("dd.MM.yyyy HH:mm")
+                    </td>
+
+                    <td>
+                        @if (request.DeliveryDate.HasValue)
+                        {
+                            @request.DeliveryDate.Value.ToString("dd.MM.yyyy")
+                        }
+                        else
+                        {
+                            <span>Не указана</span>
+                        }
+                    </td>
+
+                    <td>
+                        <a href="@request.ProductUrl"
+                           target="_blank"
+                           rel="noopener noreferrer">
+                            Открыть товар
+                        </a>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}

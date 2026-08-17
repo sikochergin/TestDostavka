@@ -1,0 +1,97 @@
+﻿@model LoginPersonRequest
+
+@{
+    ViewData["Title"] = "Вход";
+}
+
+<div class="auth-page">
+    <div class="auth-container">
+        <section class="auth-card">
+            <header class="auth-card__header">
+                <div class="auth-card__icon">
+                    TD
+                </div>
+
+                <h1 class="auth-card__title">
+                    Вход в аккаунт
+                </h1>
+
+                <p class="auth-card__description">
+                    Введите электронную почту и пароль для продолжения
+                </p>
+            </header>
+
+            <form class="auth-form"
+                  asp-controller="Person"
+                  asp-action="Login"
+                  asp-route-returnUrl="@ViewData["ReturnUrl"]"
+                  method="post">
+
+                <div asp-validation-summary="ModelOnly"
+                     class="auth-validation-summary">
+                </div>
+
+                <div class="auth-form__group">
+                    <label asp-for="Email"
+                           class="auth-form__label">
+                        Электронная почта
+                    </label>
+
+                    <input asp-for="Email"
+                           class="auth-form__input"
+                           type="email"
+                           autocomplete="email"
+                           placeholder="example@mail.ru" />
+
+                    <span asp-validation-for="Email"
+                          class="auth-validation-message">
+                    </span>
+                </div>
+
+                <div class="auth-form__group">
+                    <label asp-for="Password"
+                           class="auth-form__label">
+                        Пароль
+                    </label>
+
+                    <input asp-for="Password"
+                           class="auth-form__input"
+                           type="password"
+                           autocomplete="current-password"
+                           placeholder="Введите пароль" />
+
+                    <span asp-validation-for="Password"
+                          class="auth-validation-message">
+                    </span>
+                </div>
+
+                <div class="auth-form__checkbox-row">
+                    <label class="auth-form__checkbox-label">
+                        <input asp-for="RememberMe"
+                               class="auth-form__checkbox" />
+
+                        <span>Запомнить меня</span>
+                    </label>
+                </div>
+
+                <button class="button button--primary auth-form__submit"
+                        type="submit">
+                    Войти
+                </button>
+            </form>
+
+            <footer class="auth-card__footer">
+                Нет аккаунта?
+
+                <a asp-controller="Person"
+                   asp-action="Register">
+                    Зарегистрироваться
+                </a>
+            </footer>
+        </section>
+    </div>
+</div>
+
+@section Scripts {
+    <partial name="_ValidationScriptsPartial" />
+}

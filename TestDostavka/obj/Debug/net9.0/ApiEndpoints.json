@@ -1,0 +1,18 @@
+[
+  {
+    "ContainingType": "TestDostavka.Controllers.YooKassaWebhookController",
+    "Method": "Webhook",
+    "RelativePath": "api/yookassa/webhook",
+    "HttpMethod": "POST",
+    "IsController": true,
+    "Order": 0,
+    "Parameters": [
+      {
+        "Name": "notification",
+        "Type": "YooKassaWebhookNotification",
+        "IsRequired": true
+      }
+    ],
+    "ReturnTypes": []
+  }
+]

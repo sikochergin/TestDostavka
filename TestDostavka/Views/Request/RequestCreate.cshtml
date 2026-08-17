@@ -1,0 +1,43 @@
+﻿@model CreateRequestModel
+
+<h1>Создать заявку</h1>
+
+<form asp-controller="Request"
+      asp-action="RequestCreate"
+      method="post">
+
+    <div asp-validation-summary="ModelOnly"></div>
+
+    <div>
+        <label asp-for="ProductName"></label>
+        <input asp-for="ProductName" />
+        <span asp-validation-for="ProductName"></span>
+    </div>
+
+    <div>
+        <label asp-for="ProductUrl"></label>
+        <input asp-for="ProductUrl" />
+        <span asp-validation-for="ProductUrl"></span>
+    </div>
+
+    <div>
+        <label asp-for="Description"></label>
+        <textarea asp-for="Description"></textarea>
+        <span asp-validation-for="Description"></span>
+    </div>
+
+    <div>
+        <label asp-for="Quantity"></label>
+        <textarea asp-for="Quantity"></textarea>
+        <span asp-validation-for="Quantity"></span>
+    </div>
+
+    <button class="button button--primary request-action-form__button type="submit">
+        Отправить заявку
+    </button>
+</form>
+
+@section Scripts
+{
+    <partial name="_ValidationScriptsPartial" />
+}

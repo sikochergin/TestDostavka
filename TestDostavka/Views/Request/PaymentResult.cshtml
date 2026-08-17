@@ -1,0 +1,47 @@
+﻿@model Payment
+
+@{
+    ViewData["Title"] = "Результат оплаты";
+}
+
+<div class="form-card">
+    <h1>Состояние платежа</h1>
+
+    <p>
+        Сумма:
+        <strong>
+            @Model.Amount.ToString("N2") ₽
+        </strong>
+    </p>
+
+    <p>
+        Статус:
+        <strong>@Model.Status</strong>
+    </p>
+
+    @if (Model.Status == PaymentStatus.Succeeded)
+    {
+        <p>
+            Платёж успешно завершён.
+        </p>
+    }
+    else if (Model.Status == PaymentStatus.Canceled)
+    {
+        <p>
+            Платёж был отменён.
+        </p>
+    }
+    else
+    {
+        <p>
+            Платёж обрабатывается. Обновите страницу через несколько секунд.
+        </p>
+    }
+
+    <a class="button button--primary"
+       asp-controller="Request"
+       asp-action="RequestCard"
+       asp-route-requestId="@Model.RequestId">
+        Вернуться к заявке
+    </a>
+</div>

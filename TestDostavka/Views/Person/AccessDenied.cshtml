@@ -1,0 +1,56 @@
+﻿@{
+    ViewData["Title"] = "Доступ запрещён";
+}
+
+<div class="auth-page">
+    <div class="auth-container access-denied-card">
+        <section class="auth-card">
+            <div class="access-denied-card__icon">
+                !
+            </div>
+
+            <div class="access-denied-card__code">
+                ОШИБКА 403
+            </div>
+
+            <h1 class="auth-card__title access-denied-card__title">
+                Доступ запрещён
+            </h1>
+
+            <p class="access-denied-card__description">
+                У вашей учётной записи нет прав для просмотра этой страницы.
+                Вернитесь в доступный раздел системы.
+            </p>
+
+            <div class="access-denied-card__actions">
+                @if (User.Identity?.IsAuthenticated == true)
+                {
+                    @if (User.IsInRole(nameof(PersonRole.Customer)))
+                    {
+                        <a class="button button--primary"
+                           asp-controller="Request"
+                           asp-action="Index">
+                            Перейти к моим заявкам
+                        </a>
+                    }
+                    else if (
+                        User.IsInRole(nameof(PersonRole.Manager)) ||
+                        User.IsInRole(nameof(PersonRole.Administrator)))
+                    {
+                        <a class="button button--primary"
+                           asp-controller="Request"
+                           asp-action="Manage">
+                            Перейти к управлению
+                        </a>
+                    }
+                }
+
+                <a class="button button--secondary"
+                   asp-controller="Home"
+                   asp-action="Index">
+                    На главную
+                </a>
+            </div>
+        </section>
+    </div>
+</div>

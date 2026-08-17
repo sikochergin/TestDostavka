@@ -1,0 +1,446 @@
+﻿@model RequestCardModel
+
+<h1>@Model.ProductName</h1>
+
+@if (TempData["PaymentError"] is string paymentError)
+{
+    <div class="auth-validation-summary">
+        @paymentError
+    </div>
+}
+
+<p>
+    Статус: <strong>@Model.Status</strong>
+</p>
+
+@if (Model.IsManager)
+{
+    <p>
+        Пользователь: @Model.CustomerEmail
+    </p>
+}
+
+<p>
+    Создана:
+    @Model.CreationDateTime.ToString("dd.MM.yyyy HH:mm")
+</p>
+
+@if (!string.IsNullOrWhiteSpace(Model.Description))
+{
+    <p>
+        Описание: @Model.Description
+    </p>
+}
+
+@if (Model.DeliveryDate.HasValue)
+{
+    <p>
+        Ожидаемая дата доставки: @Model.DeliveryDate.
+    </p>
+}
+else
+{
+    <p>
+        Ожидаемая дата доставки: Пока не установлена.
+    </p>
+}
+
+<p>
+    <a href="@Model.ProductUrl"
+       target="_blank"
+       rel="noopener noreferrer">
+        Открыть товар
+    </a>
+</p>
+
+@if (Model.OfferedPrice.HasValue)
+{
+    <h2>Предложение</h2>
+
+    <p>
+        Цена:
+        <strong>
+            @Model.OfferedPrice.Value.ToString("N2") ₽
+        </strong>
+    </p>
+}
+
+<hr />
+
+@if (Model.IsCustomer)
+{
+    <section class="request-customer-actions">
+        <div class="request-customer-actions__header">
+            <h2 class="request-customer-actions__title">
+                Действия по заявке
+            </h2>
+
+            <p class="request-customer-actions__description">
+                Доступные действия зависят от текущего статуса заявки.
+            </p>
+        </div>
+
+        @if (Model.Status == RequestStatus.UnderReview || Model.Status == RequestStatus.Rejected)
+        {
+            <div class="request-customer-actions__row">
+                <form asp-controller="Request"
+                      asp-action="CancelRequest"
+                      asp-route-requestId="@Model.Id"
+                      method="post">
+
+                    <button class="button button--muted-danger"
+                            type="submit">
+                        Отменить заявку
+                    </button>
+                </form>
+            </div>
+        }
+
+        @if (Model.Status == RequestStatus.OfferReady)
+        {
+            <div class="request-customer-actions__row">
+                <form asp-controller="Request"
+                      asp-action="AcceptOffer"
+                      asp-route-requestId="@Model.Id"
+                      method="post">
+
+                    <button class="button button--success"
+                            type="submit">
+                        Принять предложение
+                    </button>
+                </form>
+
+                <form asp-controller="Request"
+                      asp-action="CancelRequest"
+                      asp-route-requestId="@Model.Id"
+                      method="post">
+
+                    <button class="button button--muted-danger"
+                            type="submit">
+                        Отменить заявку
+                    </button>
+                </form>
+            </div>
+
+            <div class="request-reject-panel">
+                <form class="request-reject-form"
+                      asp-controller="Request"
+                      asp-action="RejectOffer"
+                      method="post">
+
+                    <input type="hidden"
+                           name="RequestId"
+                           value="@Model.Id" />
+
+                    <div class="request-reject-form__field">
+                        <label for="customerComment">
+                            Комментарий к отказу
+                        </label>
+
+                        <textarea class="request-reject-form__textarea"
+                                  id="customerComment"
+                                  name="Comment"
+                                  placeholder="Например: предложите меньшую стоимость или уточните условия"
+                                  required></textarea>
+                    </div>
+
+                    <button class="button button--warning"
+                            type="submit">
+                        Отклонить предложение
+                    </button>
+                </form>
+            </div>
+        }
+
+        @if (Model.Status == RequestStatus.OfferAccepted)
+        {
+            <div class="request-customer-actions__row">
+                <form asp-controller="Request"
+                      asp-action="PaymentTest"
+                      asp-route-requestId="@Model.Id"
+                      method="post">
+
+                    <button class="button button--success"
+                            type="submit">
+                        Оплатить
+                    </button>
+                </form>
+
+                <form asp-controller="Request"
+                      asp-action="CancelRequest"
+                      asp-route-requestId="@Model.Id"
+                      method="post">
+
+                    <button class="button button--muted-danger"
+                            type="submit">
+                        Отменить заявку
+                    </button>
+                </form>
+            </div>
+        }
+
+        @if (Model.Status == RequestStatus.ReadyForPickUp)
+        {
+            <div class="request-customer-actions__row">
+                <form asp-controller="Request"
+                      asp-action="ProductPickedUp"
+                      asp-route-requestId="@Model.Id"
+                      method="post">
+                    <button class="button button--success"
+                            type="submit">
+                        Товар получен
+                    </button>
+                </form>
+            </div>
+        }
+    </section>
+}
+@if (Model.IsManager && Model.Status != RequestStatus.Cancelled && Model.Status != RequestStatus.Completed)
+{
+    <section class="request-management">
+        <h2 class="request-management__title">
+            Управление заявкой
+        </h2>
+
+        <div class="request-action-card">
+            <div class="request-action-card__header">
+                <h3 class="request-action-card__title">
+                    Изменить статус
+                </h3>
+
+                <p class="request-action-card__description">
+                    Выберите новый статус и при необходимости добавьте комментарий.
+                </p>
+            </div>
+
+            <form class="request-action-form"
+                  asp-controller="Request"
+                  asp-action="ChangeStatus"
+                  method="post">
+
+                <input type="hidden"
+                       name="RequestId"
+                       value="@Model.Id" />
+
+                <div class="request-action-form__field">
+                    <label for="newStatus">
+                        Новый статус
+                    </label>
+
+                    <select class="request-action-form__select"
+                            id="newStatus"
+                            name="NewStatus">
+
+                        @foreach (var status in Enum.GetValues<RequestStatus>())
+                        {
+                            if (status == Model.Status)
+                            {
+                                <option value="@status" selected>
+                                    @status
+                                </option>
+                            }
+                            else
+                            {
+                                <option value="@status">
+                                    @status
+                                </option>
+                            }
+                        }
+                    </select>
+                </div>
+
+                <div class="request-action-form__field">
+                    <label for="statusComment">
+                        Комментарий
+                    </label>
+
+                    <textarea class="request-action-form__textarea"
+                              id="statusComment"
+                              name="Comment"
+                              placeholder="Необязательный комментарий"></textarea>
+                </div>
+
+                <button class="button button--primary request-action-form__button"
+                        type="submit">
+                    Сохранить статус
+                </button>
+            </form>
+        </div>
+    </section>
+    @if (Model.Status != RequestStatus.Cancelled &&
+         Model.Status != RequestStatus.Completed &&
+         Model.Status != RequestStatus.ReadyForPickUp)
+    {
+        <div class="request-action-card request-action-card--highlight">
+            <div class="request-action-card__header">
+                <h3 class="request-action-card__title">
+                    Изменить дату доставки
+                </h3>
+
+                <p class="request-action-card__description">
+                    Укажите предполагаемую дату доставки и комментарий.
+                </p>
+            </div>
+
+            <form class="request-action-form"
+                  asp-controller="Request"
+                  asp-action="SetDeliveryDate"
+                  method="post">
+
+                <input type="hidden"
+                       name="RequestId"
+                       value="@Model.Id" />
+
+                <div class="request-action-form__field">
+                    <label for="deliveryDate">
+                        Дата доставки
+                    </label>
+
+                    <input class="request-action-form__input"
+                           type="date"
+                           id="deliveryDate"
+                           name="DeliveryDate"
+                           value="@Model.DeliveryDate?.ToString("yyyy-MM-dd")" />
+                </div>
+
+                <div class="request-action-form__field">
+                    <label for="deliveryComment">
+                        Комментарий
+                    </label>
+
+                    <textarea class="request-action-form__textarea"
+                              id="deliveryComment"
+                              name="Comment"
+                              placeholder="Необязательный комментарий"></textarea>
+                </div>
+
+                <button class="button button--primary request-action-form__button"
+                        type="submit">
+                    Изменить дату
+                </button>
+            </form>
+        </div>
+    }
+    @if (Model.Status == RequestStatus.UnderReview ||
+     Model.Status == RequestStatus.Rejected)
+    {
+        <div class="request-action-card request-action-card--warning">
+            <div class="request-action-card__header">
+                <h3 class="request-action-card__title">
+                    Создать предложение
+                </h3>
+
+                <p class="request-action-card__description">
+                    После сохранения заявка перейдёт в статус OfferReady.
+                </p>
+            </div>
+
+            <form class="request-action-form request-action-form--offer"
+                  asp-controller="Request"
+                  asp-action="CreateOffer"
+                  method="post">
+
+                <input type="hidden"
+                       name="RequestId"
+                       value="@Model.Id" />
+
+                <div class="request-action-form__field">
+                    <label for="price">
+                        Цена, ₽
+                    </label>
+
+                    <input class="request-action-form__input"
+                           type="number"
+                           id="price"
+                           name="Price"
+                           min="1"
+                           step="0.01"
+                           value="@Model.OfferedPrice"
+                           required />
+                </div>
+
+                <div class="request-action-form__field">
+                    <label for="offerComment">
+                        Комментарий
+                    </label>
+
+                    <textarea class="request-action-form__textarea"
+                              id="offerComment"
+                              name="Comment"
+                              placeholder="Комментарий к предложению"></textarea>
+                </div>
+
+                <button class="button button--primary request-action-form__button"
+                        type="submit">
+                    Сохранить предложение
+                </button>
+            </form>
+        </div>
+    }
+}
+
+<section class="request-comments">
+    <div class="request-comments__header">
+        <div>
+            <h2 class="request-comments__title">
+                Комментарии
+            </h2>
+
+            <p class="request-comments__description">
+                История комментариев и изменений по заявке
+            </p>
+        </div>
+
+        <span class="request-comments__count">
+            @Model.Comments.Count
+        </span>
+    </div>
+
+    @if (Model.Comments.Count == 0)
+    {
+        <div class="request-comments__empty">
+            Комментариев и изменений пока нет.
+        </div>
+    }
+    else
+    {
+        <div class="request-comments__list">
+            @foreach (var comment in Model.Comments)
+            {
+                var authorText = comment.IsFromCustomer
+                    ? "Пользователь"
+                    : "Менеджер";
+
+                var authorClass = comment.IsFromCustomer
+                    ? "request-comment--customer"
+                    : "request-comment--manager";
+
+                <article class="request-comment @authorClass">
+                    <div class="request-comment__header">
+                        <span class="request-comment__author">
+                            @authorText
+                        </span>
+
+                        @if (!string.IsNullOrWhiteSpace(comment.TechComment))
+                        {
+                            <span class="request-comment__tech">
+                                @comment.TechComment
+                            </span>
+                        }
+
+                        <time class="request-comment__date">
+                            @comment.CreationDateTime
+                        </time>
+                    </div>
+
+                    @if (!string.IsNullOrWhiteSpace(comment.Comment))
+                    {
+                        <div class="request-comment__text">
+                            @comment.Comment.Trim()
+                        </div>
+                    }
+                </article>
+            }
+        </div>
+    }
+</section>

@@ -1,0 +1,95 @@
+﻿<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="utf-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>@ViewData["Title"] - TestDostavka</title>
+
+    <link rel="stylesheet"
+          href="~/css/site.css"
+          asp-append-version="true" />
+</head>
+
+<body>
+    <header class="site-header">
+        <div class="site-header__container">
+            <a class="site-logo"
+               asp-controller="Home"
+               asp-action="Index">
+                TestDostavka
+            </a>
+
+            <nav class="site-navigation">
+                @if (User.Identity?.IsAuthenticated == true)
+                {
+                    @if (User.IsInRole(nameof(PersonRole.Customer)))
+                    {
+                        <a class="site-navigation__link"
+                           asp-controller="Request"
+                           asp-action="Index">
+                            Мои заявки
+                        </a>
+
+                        <a class="site-navigation__link"
+                           asp-controller="Request"
+                           asp-action="RequestCreate">
+                            Создать заявку
+                        </a>
+                    }
+                    else if (
+                        User.IsInRole(nameof(PersonRole.Manager)) ||
+                        User.IsInRole(nameof(PersonRole.Administrator)))
+                    {
+                        <a class="site-navigation__link"
+                           asp-controller="Request"
+                           asp-action="Manage">
+                            Управление заявками
+                        </a>
+                    }
+
+                    <form class="logout-form"
+                          asp-controller="Person"
+                          asp-action="Logout"
+                          method="get">
+                        <button class="button button--secondary" type="submit">
+                            Выйти
+                        </button>
+                    </form>
+                }
+                else
+                {
+                    <a class="site-navigation__link" 
+                       asp-controller="Person"
+                       asp-action="Register">
+                        Регистрация
+                    </a>
+
+                    <a class="site-navigation__link" 
+                       asp-controller="Person"
+                       asp-action="Login">
+                        Войти
+                    </a>
+                }
+            </nav>
+            </div>
+    </header>
+
+    <main class="page">
+        <div class="page__container">
+            @RenderBody()
+        </div>
+    </main>
+
+    <footer class="site-footer">
+        <div class="site-footer__container">
+            <span>
+                © @DateTime.Now.Year TestDostavka
+            </span>
+        </div>
+    </footer>
+
+    @await RenderSectionAsync(
+        "Scripts",
+        required: false)
+</body>
+</html>

@@ -1,0 +1,64 @@
+﻿@model IReadOnlyList<CustomerRequestsListModel>
+
+<h1>Мои заявки</h1>
+
+@if (Model.Count == 0)
+{
+    <p>У вас пока нет заявок.</p>
+}
+else
+{
+    <table>
+        <thead>
+            <tr>
+                <th>Название товара</th>
+                <th>Статус</th>
+                <th>Дата создания</th>
+                <th>Дата доставки</th>
+                <th>Ссылка на товар</th>
+            </tr>
+        </thead>
+
+        <tbody>
+            @foreach (var request in Model)
+            {
+                <tr>
+                    <td>
+                        <a asp-controller="Request"
+                           asp-action="RequestCard"
+                           asp-route-requestId="@request.Id">
+                            @request.ProductName
+                        </a>
+                    </td>
+
+                    <td>
+                        @request.Status
+                    </td>
+
+                    <td>
+                        @request.DateTime.ToString("dd.MM.yyyy HH:mm")
+                    </td>
+
+                    <td>
+                        @if (request.DeliveryDate.HasValue)
+                        {
+                            @request.DeliveryDate.Value.ToString("dd.MM.yyyy")
+                        }
+                        else
+                        {
+                            <span>Не указана</span>
+                        }
+                    </td>
+
+                    <td>
+                        <a href="@request.ProductUrl"
+                           target="_blank"
+                           rel="noopener noreferrer">
+                            Открыть товар
+                        </a>
+                    </td>
+                </tr>
+            }
+        </tbody>
+    </table>
+}
